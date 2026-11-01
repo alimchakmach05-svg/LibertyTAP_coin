@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Моя Тапалка</title>
+    <!-- Официальный SDK Телеграма -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            margin: 0; padding: 0;
+            background: #121212; color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; overflow: hidden;
+        }
+        .header { margin-top: 40px; text-align: center; }
+        .score { font-size: 42px; font-weight: bold; margin-top: 10px; color: #f3ba2f; }
+        
+        /* Кнопка-монетка */
+        .clicker-container { position: relative; display: flex; align-items: center; justify-content: center; }
+        #coin {
+            width: 220px; height: 220px;
+            background: linear-gradient(135deg, #f3ba2f, #e8950c);
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(243, 186, 47, 0.4);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: bold; color: #1a1a1a;
+            transition: transform 0.05s ease;
+        }
+        #coin:active { transform: scale(0.92); }
+
+        /* Всплывающие цифры при клике */
+        .fly-text {
+            position: absolute;
+            font-size: 24px; font-weight: bold; color: #4ade80;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+        }
+
+        .footer { margin-bottom: 40px; font-size: 14px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>Ваш баланс</div>
+        <div class="score" id="score">0</div>
+    </div>
+
+    <div class="clicker-container" id="container">
+        <div id="coin" onclick="tap(event)">💰</div>
+    </div>
+
+    <div class="footer">Тапай по монете!</div>
+
+    <script>
+        let score = 0;
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем мини-приложение на весь экран
+
+        function tap(event) {
+            score++;
+            document.getElementById('score').innerText = score;
+
+            // Легкая вибрация телефона (если поддерживается Телеграмом)
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+
+            // Создаем всплывающую цифру там, куда кликнули
+            showFloatingText(event);
+        }
+
+        function showFloatingText(event) {
+            const container = document.getElementById('container');
+            const el = document.createElement('div');
+            el.className = 'fly-text';
+            el.innerText = '+1';
+
+            // Координаты клика относительно контейнера
+            const rect = container.getBoundingClientRect();
+            const x = event.clientX - rect.left - 20;
+            const y = event.clientY - rect.top - 20;
+
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 600); // Удаляем элемент после завершения анимации
+        }
+    </script>
+</body>
+</html>
